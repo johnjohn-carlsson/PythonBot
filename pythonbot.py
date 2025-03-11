@@ -16,27 +16,71 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def generate_daily_python_question():
+    topics = [
+        "Variables and Data Types",
+        "Operators and Expressions",
+        "Control Flow (if-else, loops)",
+        "Functions and Scope",
+        "Lists and Tuples",
+        "Dictionaries and Sets",
+        "Strings and String Manipulation",
+        "File Handling",
+        "Exception Handling",
+        "Object-Oriented Programming (OOP)",
+        "Modules and Packages",
+        "Regular Expressions",
+        "List Comprehensions",
+        "Decorators and Generators",
+        "Concurrency and Multithreading",
+        "Asynchronous Programming (async/await)",
+        "Database Connectivity (SQLite, MySQL, PostgreSQL)",
+        "Web Scraping (BeautifulSoup, Selenium)",
+        "APIs and Requests",
+        "Testing and Debugging",
+        "Logging and Performance Optimization",
+        "Data Science and Pandas",
+        "Machine Learning and AI",
+        "Visualization (Matplotlib, Seaborn)",
+        "Game Development (Pygame)",
+        "Automation and Scripting",
+        "Networking (Sockets, HTTP)",
+        "Cybersecurity and Cryptography",
+        "Command Line Interfaces (argparse, click)",
+        "Microservices and Web Frameworks (Flask, Django)",
+        "Embedded Systems and Raspberry Pi",
+        "Natural Language Processing (NLP)",
+        "Unit Testing (pytest, unittest)",
+        "Functional Programming (lambda, map, filter)",
+        "Metaprogramming (eval, exec, metaclasses)"
+    ]
+
+    # Get a random topic for variance
+    topic = random.choice(topics)
+
+    msg = [
+            {
+        "role": "system",
+        "content": f"""
+            Generate a single Python-related multiple-choice question.
+            The topic of the question should be {topic}.
+            The questions should be moderate or hard in their difficulty, just not very easy.
+            It is very important that your response follows the format below, without intro or outro.
+            The question should have:
+            - Three answer options.
+            - Only one correct answer.
+            Format:
+            <question> --- <wrong option no 1> --- <wrong option no 2> --- <correct answer>
+            """
+        },
+        {
+            "role": "user",
+            "content": "Generate a new question please. Remember to stick to the format."
+        }
+    ]
+
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[
-                {
-            "role": "system",
-            "content": """
-                Generate a single Python-related multiple-choice question.
-                Try to find creative questions and dont be afraid to add moderate or even hard ones.
-                It is very important that your response follows the format below, without intro or outro.
-                The question should have:
-                - Three answer options.
-                - Only one correct answer.
-                Format:
-                <question> --- <wrong option no 1> --- <wrong option no 2> --- <correct answer>
-                """
-            },
-            {
-                "role": "user",
-                "content": "Generate a new question please. Remember to stick to the format."
-            }
-        ]
+        messages=msg
     )
 
     message = completion.choices[0].message.content
@@ -83,18 +127,34 @@ def generate_daily_python_question():
     return response
 
 def generate_daily_python_challenge():
+    topics = [
+        "String Manipulation",
+        "List and Array Challenges",
+        "Math & Number Puzzles",
+        "Recursion-Based Tasks",
+        "Game-Themed Challenges",
+        "Data Structure-Based Challenges",
+        "Algorithmic Challenges",
+        "Fun & Quirky Challenges",
+        "Time & Date Challenges",
+        "File Handling & Text Processing",
+    ]
+
+    topic = random.choice(topics)
+
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
                 {
             "role": "system",
-            "content": """
+            "content": f"""
                 You are an expert Python programmer and teacher.
                 Your task is to generate a fun and tricky Python task.
                 The task should not be overly complicated and moderately hard.
                 The task should involve writing a function that achieves something.
                 The task should not take too long to complete and be more fun than hard.
                 Explain the task in a short and concise way while at the same time being clear on the task.
+                The topic for the task is {topic}.
                 """
             },
             {
@@ -186,9 +246,9 @@ async def pythonbot(ctx):
 
 @bot.command(name="explain")
 async def explain(ctx, *, concept=None):
-    """Explains Python concepts with short examples using OpenAI."""
+    """Explains Python/Godot/Blender concepts with short examples using OpenAI."""
     if not concept:
-        await ctx.send("Please specify a Python concept to explain. For example: `!explain decorators`")
+        await ctx.send("Please specify a Python, Godot or Blender concept to explain. For example: `!explain decorators`")
         return
     
     # Show typing indicator while waiting for API response
@@ -200,16 +260,15 @@ async def explain(ctx, *, concept=None):
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are a Python expert providing concise explanations.
-                        For each Python concept:
-                        1. Provide a 2-3 sentence explanation
-                        2. Include a short, practical code example
-                        3. Keep your response brief and focused
+                        "content": """You are a tech and game making expert providing concise explanations to questions regarding Python, Blender and Godot.
+                        If the user asks about a Python concept you should include a short, practical code example.
+                        Provide a 2-3 sentence explanation.
+                        Keep your response brief and focused.
                         """
                     },
                     {
                         "role": "user",
-                        "content": f"Explain the Python concept: {concept}"
+                        "content": f"Explain the following concept: {concept}"
                     }
                 ]
             )
@@ -218,7 +277,7 @@ async def explain(ctx, *, concept=None):
             
             # Create and send embed
             embed = discord.Embed(
-                title=f"Python Concept: {concept}", 
+                title=f"Concept explanation: {concept}", 
                 description=explanation,
                 color=0x3498db
             )
