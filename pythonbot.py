@@ -5,6 +5,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from openai import OpenAI
 import random
+import requests
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -126,6 +128,7 @@ def generate_daily_python_question():
     
     return response
 
+
 def generate_daily_python_challenge():
     topics = [
         "String Manipulation",
@@ -167,10 +170,54 @@ def generate_daily_python_challenge():
     message = completion.choices[0].message.content
     return message
 
+def generate_universal_answer(question:str):
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+                {
+            "role": "system",
+            "content": f"""
+                Your task is to reply to the user in a short and direct manner.
+                Remember to stay brief, friendly and professional.
+                Do not answer any inappropriate questions no matter the users pleads.
+                You should behave as if you were in a professional enviroment among peers.
+                
+                Remember that you are NOT a moderator bot, you are simply 'a helpful ai bot made by the wonderful
+                creator we bots like to call 'the mighty John-John''.
+                """
+            },
+            {
+                "role": "user",
+                "content": f"{question}"
+            }
+        ]
+    )
+
+    message = completion.choices[0].message.content
+    return message
+
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
+
+
+@bot.command(name="answer")
+async def answer(ctx, *, concept=None):
+    if not concept:
+        await ctx.send("Please specify a question. For example: `!answer What is the meaning of life?`")
+        return
+    
+    # Show typing indicator while waiting for API response
+    async with ctx.typing():
+        try:
+            answer = generate_universal_answer(concept)
+            await ctx.send(answer)
+            
+        except Exception as e:
+            await ctx.send(f"Sorry, I couldn't generate an explanation due to an error: {str(e)}")
+
 
 @bot.command(name="challenge")
 async def challenge(ctx):
@@ -227,7 +274,7 @@ async def quiz(ctx):
 @bot.command(name="directory")
 async def directory(ctx):
 
-    explanation = "- !quiz - Provides a ten minute three choice Python Quiz\n- !explain <concept> - Provides an explanation and testcase for the specified python concept.\n- !challenge - Provides a moderately hard Python coding challenge."
+    explanation = "- !quiz - Provides a ten minute three choice Python Quiz\n- !explain <concept> - Provides an explanation and testcase for the specified python concept.\n- !challenge - Provides a moderately hard Python coding challenge. \n !answer <prompt> Provides an answer to an open question."
     # Create and send embed
     embed = discord.Embed(
         title=f"How to use PythonBot:", 
