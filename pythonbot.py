@@ -274,7 +274,7 @@ async def quiz(ctx):
 @bot.command(name="directory")
 async def directory(ctx):
 
-    explanation = "- !quiz - Provides a ten minute three choice Python Quiz\n- !explain <concept> - Provides an explanation and testcase for the specified python concept.\n- !challenge - Provides a moderately hard Python coding challenge. \n !answer <prompt> Provides an answer to an open question."
+    explanation = "- !quiz - Provides a ten minute three choice Python Quiz\n- !explain <concept> - Provides an explanation and testcase for the specified python concept.\n- !challenge - Provides a moderately hard Python coding challenge.\n- !answer <prompt> - Provides an answer to an open question."
     # Create and send embed
     embed = discord.Embed(
         title=f"How to use PythonBot:", 
